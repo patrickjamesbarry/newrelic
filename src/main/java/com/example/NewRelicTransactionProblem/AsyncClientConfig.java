@@ -67,7 +67,6 @@ public class AsyncClientConfig {
                 .addExecInterceptorLast("mdcRestore", new AsyncExecChainHandler() {  //The names of the 3 provided exec interceptors are: REDIRECT, PROTOCOL, RETRY
                     @Trace(async = true)
                     @Override
-                    //This interceptor is triggered on apache async thread
                     public void execute(HttpRequest request, AsyncEntityProducer entityProducer, AsyncExecChain.Scope scope, AsyncExecChain chain, AsyncExecCallback asyncExecCallback) throws HttpException, IOException {
                         LOGGER.info("Interceptor second");
                         if (scope.clientContext instanceof RequestContext context) {
@@ -79,13 +78,17 @@ public class AsyncClientConfig {
                     }
                 })
 
-                //This interceptor is triggered on tomcat thread
                 .addExecInterceptorBefore("mdcRestore", "FIRST_ONE", new AsyncExecChainHandler() {  //The names of the 3 provided exec interceptors are: REDIRECT, PROTOCOL, RETRY
+                    @Trace(async = true)
                     @Override
                     public void execute(HttpRequest request, AsyncEntityProducer entityProducer, AsyncExecChain.Scope scope, AsyncExecChain chain, AsyncExecCallback asyncExecCallback) throws HttpException, IOException {
-                        LOGGER.info("Interceptor first");
-                        NewRelic.addCustomParameter("First interceptor", true);
-                        chain.proceed(request, entityProducer, scope, asyncExecCallback);
+                        if (scope.clientContext instanceof RequestContext context) {
+                            try (NewRelicToken token = context.createToken()) {
+                                LOGGER.info("Interceptor first");
+                                NewRelic.addCustomParameter("First interceptor", true);
+                                chain.proceed(request, entityProducer, scope, asyncExecCallback);
+                            }
+                        }
                     }
                 })
 
