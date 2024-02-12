@@ -73,6 +73,10 @@ public class AsyncClientConfig {
                             try (NewRelicToken token = context.createToken()) {
                                 NewRelic.addCustomParameter("Second interceptor", true);
                                 chain.proceed(request, entityProducer, scope, asyncExecCallback);
+                                // looks like this is the last interceptor, so we can expire the token here
+                                // I tested this without this expire. I was able to see the attributes in the transaction
+                                // but since the token was not expired, it took a few minutes for the transaction to show up in the UI.
+                                token.expire();
                             }
                         }
                     }
