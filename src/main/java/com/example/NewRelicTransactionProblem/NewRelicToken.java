@@ -12,9 +12,15 @@ public class NewRelicToken implements AutoCloseable {
 
     private final Token token;
 
-    public NewRelicToken(Transaction transaction) {
+    public NewRelicToken(Token token) {
         log.info("Attempting to use token {}", getDebuggingCallerInfo(List.of(this.getClass().getName(), ThreadContext.class.getName(), RequestContext.class.getName()), List.of()));
-        token = transaction.getToken(); //Beware, Even though this is a get(), it creates a new token!
+        // Transaction#getToken does not work as expected in this scenario.
+        // It will actually try to get the TransactionActivity from ThreadLocal.
+        // But since at the time this is running it is in a different thread, the TransactionActivity
+        // for the Transaction that was stored here is not in ThreadLocal.
+        // If you debug the original code, the token that was generated was a NoOpToken.
+        // So it is recommended to store a Token, and not a Transaction.
+        this.token = token;
         linkThreadToNewRelicTransaction();
     }
 
@@ -24,6 +30,11 @@ public class NewRelicToken implements AutoCloseable {
 
     @Override
     public void close() {
+        // since the token is reused by the interceptors, it should only be expired by the last one.
+        // token.expire();
+    }
+
+    public void expire() {
         token.expire();
     }
 
