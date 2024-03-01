@@ -70,10 +70,9 @@ public class AsyncClientConfig {
                     public void execute(HttpRequest request, AsyncEntityProducer entityProducer, AsyncExecChain.Scope scope, AsyncExecChain chain, AsyncExecCallback asyncExecCallback) throws HttpException, IOException {
                         LOGGER.info("Interceptor second");
                         if (scope.clientContext instanceof RequestContext context) {
-                            try (NewRelicToken token = context.createToken()) {
-                                NewRelic.addCustomParameter("Second interceptor", true);
-                                chain.proceed(request, entityProducer, scope, asyncExecCallback);
-                            }
+                            context.getToken().link();
+                            NewRelic.addCustomParameter("Second interceptor", true);
+                            chain.proceed(request, entityProducer, scope, asyncExecCallback);
                         }
                     }
                 })
@@ -83,11 +82,10 @@ public class AsyncClientConfig {
                     @Override
                     public void execute(HttpRequest request, AsyncEntityProducer entityProducer, AsyncExecChain.Scope scope, AsyncExecChain chain, AsyncExecCallback asyncExecCallback) throws HttpException, IOException {
                         if (scope.clientContext instanceof RequestContext context) {
-                            try (NewRelicToken token = context.createToken()) {
-                                LOGGER.info("Interceptor first");
-                                NewRelic.addCustomParameter("First interceptor", true);
-                                chain.proceed(request, entityProducer, scope, asyncExecCallback);
-                            }
+                            context.getToken().link();
+                            LOGGER.info("Interceptor first");
+                            NewRelic.addCustomParameter("First interceptor", true);
+                            chain.proceed(request, entityProducer, scope, asyncExecCallback);
                         }
                     }
                 })

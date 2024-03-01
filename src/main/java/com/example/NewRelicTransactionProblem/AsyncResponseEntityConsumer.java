@@ -36,31 +36,30 @@ public class AsyncResponseEntityConsumer extends BasicAsyncEntityConsumer {
     @Override
     @Trace(async = true, metricName = "EntityConsumer - Consuming bytes")
     protected void data(ByteBuffer src, boolean endOfStream) throws IOException {
-        try (NewRelicToken token = requestContext.createToken()) {
-            if (src == null) {
-                return;
-            }
-            long durationMs = Duration.between(readStartTime, Instant.now()).toMillis();
-
-            if (durationMs > 500) {
-                NewRelic.addCustomParameter("ResponseBufferingTimeMs", durationMs);
-                throw new RuntimeException("Transmitting too slow");
-            }
-            totalLength += src.remaining();
-
-            if (totalLength > 1000) {
-                NewRelic.addCustomParameter("ResponseBufferingTimeMs", durationMs);
-                NewRelic.addCustomParameter("ResponseSizeBytes", totalLength);
-                NewRelic.addCustomParameter("TooBigResponse", "true");
-                throw new RuntimeException("Response too big");
-            }
-
-            if (endOfStream) {
-                NewRelic.addCustomParameter("ResponseBufferingTimeMs", durationMs);
-                NewRelic.addCustomParameter("ResponseSizeBytes", totalLength);
-            }
-
-            super.data(src, endOfStream);
+        requestContext.getToken().link();
+        if (src == null) {
+            return;
         }
+        long durationMs = Duration.between(readStartTime, Instant.now()).toMillis();
+
+        if (durationMs > 500) {
+            NewRelic.addCustomParameter("ResponseBufferingTimeMs", durationMs);
+            throw new RuntimeException("Transmitting too slow");
+        }
+        totalLength += src.remaining();
+
+        if (totalLength > 1000) {
+            NewRelic.addCustomParameter("ResponseBufferingTimeMs", durationMs);
+            NewRelic.addCustomParameter("ResponseSizeBytes", totalLength);
+            NewRelic.addCustomParameter("TooBigResponse", "true");
+            throw new RuntimeException("Response too big");
+        }
+
+        if (endOfStream) {
+            NewRelic.addCustomParameter("ResponseBufferingTimeMs", durationMs);
+            NewRelic.addCustomParameter("ResponseSizeBytes", totalLength);
+        }
+
+        super.data(src, endOfStream);
     }
 }

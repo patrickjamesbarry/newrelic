@@ -1,6 +1,7 @@
 package com.example.NewRelicTransactionProblem;
 
 import com.newrelic.api.agent.NewRelic;
+import com.newrelic.api.agent.Token;
 import com.newrelic.api.agent.Transaction;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.slf4j.Logger;
@@ -13,15 +14,15 @@ import java.util.StringJoiner;
 class ThreadContext extends HttpClientContext implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadContext.class);
-    private final Transaction transaction;
+    private final Token token;
 
     ThreadContext() {
         super();
-        transaction = NewRelic.getAgent().getTransaction();
+        token = NewRelic.getAgent().getTransaction().getToken();
     }
 
-    public NewRelicToken createToken() {
-        return new NewRelicToken(transaction);
+    public Token getToken() {
+        return token;
     }
 
     @Override

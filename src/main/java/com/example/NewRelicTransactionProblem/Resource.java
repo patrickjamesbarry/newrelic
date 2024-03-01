@@ -1,6 +1,7 @@
 package com.example.NewRelicTransactionProblem;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.newrelic.api.agent.NewRelic;
 import com.newrelic.api.agent.Trace;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -15,6 +16,9 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -29,7 +33,7 @@ public class Resource {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Trace
-    public void getTest(@Context ContainerRequestContext request, @Suspended AsyncResponse asyncResponse) throws JsonProcessingException {
+    public void getTest(@Context ContainerRequestContext request, @Suspended AsyncResponse asyncResponse) throws JsonProcessingException, ExecutionException, InterruptedException {
         RequestContext requestContext = (RequestContext) request.getProperty(RequestContext.REQUEST_CONTEXT);
 
         asyncResponse.setTimeout(10, TimeUnit.SECONDS);
