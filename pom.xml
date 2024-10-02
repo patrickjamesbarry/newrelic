@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.2</version>
+        <version>3.3.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
@@ -15,7 +15,7 @@
     <description>Demo project for Spring Boot</description>
     <properties>
         <java.version>17</java.version>
-        <apache.client.async.version>5.1.4</apache.client.async.version>
+        <apache.client.async.version>5.3.1</apache.client.async.version>
 
     </properties>
     <dependencies>
@@ -31,17 +31,22 @@
         <dependency>
             <groupId>org.apache.httpcomponents.core5</groupId>
             <artifactId>httpcore5</artifactId>
-            <version>5.1.5</version>
+            <version>5.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents.core5</groupId>
             <artifactId>httpcore5-h2</artifactId>
-            <version>5.1.5</version>
+            <version>5.3</version>
         </dependency>
         <dependency>
             <groupId>com.newrelic.agent.java</groupId>
             <artifactId>newrelic-api</artifactId>
-            <version>8.2.0</version>
+            <version>8.11.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.newrelic.agent.java</groupId>
+            <artifactId>newrelic-agent</artifactId>
+            <version>8.11.1</version>
         </dependency>
         <dependency>
             <groupId>jakarta.inject</groupId>
@@ -51,7 +56,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.13.0</version>
+            <version>3.17.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

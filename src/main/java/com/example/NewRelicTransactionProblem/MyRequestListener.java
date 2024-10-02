@@ -1,6 +1,7 @@
 package com.example.NewRelicTransactionProblem;
 
 import com.newrelic.api.agent.NewRelic;
+import com.newrelic.api.agent.Token;
 import com.newrelic.api.agent.Trace;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.UriInfo;
@@ -50,12 +51,15 @@ public class MyRequestListener implements RequestEventListener {
 
     @Trace(dispatcher = true)
     public void matchingStartEvent(RequestEvent event) {
+
         final ContainerRequest request = event.getContainerRequest();
         final UriInfo uriInfo = request.getUriInfo();
 
         LOG.trace("starting new relic trace");
         this.requestContext = new RequestContext(getStartTime(), RequestContext.RequestType.ASYNC);
         request.setProperty(REQUEST_CONTEXT, requestContext);
+
+
         NewRelic.addCustomParameter("org-id", request.getHeaderString("My-Organization-Id"));
 
         if (shouldLogTrace(uriInfo.getPath()) && LOG.isInfoEnabled()) {
@@ -72,7 +76,7 @@ public class MyRequestListener implements RequestEventListener {
         ContainerRequest containerRequest = event.getContainerRequest();
         if (shouldLogTrace(containerRequest.getUriInfo().getPath()) && LOG.isInfoEnabled()) {
             //No need to trace full path, http verb, etc because it's going to be traced as part of the MDC context
-            LOG.info("< End: [{}] : [{}ms]", getSafeQueryParams(containerRequest), Duration.between(startTime, Instant.now())
+            LOG.info("< End: responseWritten: {} [{}] : [{}ms]", event.isResponseWritten(), getSafeQueryParams(containerRequest), Duration.between(startTime, Instant.now())
                     .toMillis());
         }
 
